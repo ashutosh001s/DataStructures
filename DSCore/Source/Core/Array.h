@@ -7,6 +7,12 @@
 
 namespace DS
 {
+	//Type definations
+	//using Integers = Array<int>;
+	//using Floats = Array<float>;
+	//using Characters = Array<char>;
+	//using Strings = Array<std::string>;
+
 	template<typename Type>
 	class Array
 	{
@@ -27,10 +33,8 @@ namespace DS
 		void LeftShift(int start);
 		void RightShift(int start, bool b_resize);
 		bool InsertSorted(Type x);
-		inline int GetLength() const { return m_length; }
+		inline size_t GetLength() const { return m_length; }
 		inline int GetSize() const { return m_size; }
-		
-
 
 	public:
 		Array() = delete;
@@ -41,8 +45,8 @@ namespace DS
 
 	private:
 		Type* m_arr = nullptr;
-		int m_size = 0;
-		int m_length = 0;
+		size_t m_size = 0;
+		size_t m_length = 0;
 		bool m_initialized = false;
 
 	private:
