@@ -1,25 +1,27 @@
 #include "iostream"
-#include "string"
-#include "Core/Array.h"
+#include "Core/DsTypes.h"
+#include "chrono"
 
-#define Log(msg) std::cout << msg <<"\n"
-#define Print(arr) \
-for(size_t i = 0; i < arr.GetLength(); i++)\
-{\
-	Log(arr[static_cast<int>(i)]); \
-} \
-
+using namespace Ds;
 
 int main()
 {
 	{
-		DS::Array<float> arr = { 24,6.89454521f,10,11 };
-		Log((arr.IsSorted() == true ? "True" : "False"));
+		Int arr = {2,4,6,8,10,12};
+		Int arr2(2);
 
-		arr.BubbleSort();
-		Log((arr.IsSorted() == true ? "True" : "False"));
+		arr2 = arr;
 
-		Print(arr);
+		arr[0] = 3;
+
+		Print(arr2)
+		Print(arr)
+		
+		//FillList(arr,100000000)
+		//BENCHMARK_START()
+		////Log("Found at : ",arr.LinearSearch(85000));
+		//Log("Found at : ",arr.BinarySearch(85000));
+		//BENCHMARK_END()
 	}
 
 	return 0;

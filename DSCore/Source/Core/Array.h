@@ -2,78 +2,97 @@
 #include "stdexcept"
 #include <type_traits>
 #include "initializer_list"
+#include"string"
+#include "thread"
+#include <future>
 
 #define NewSize(x) ((x)+5)
 
-namespace DS
+enum Status
 {
-	//Type definations
-	//using Integers = Array<int>;
-	//using Floats = Array<float>;
-	//using Characters = Array<char>;
-	//using Strings = Array<std::string>;
+	Ok,
+	Err
+};
 
-	template<typename Type>
-	class Array
+template<typename T>
+struct Result
+{
+	Status status;
+	T value;
+	const char * msg;
+};
+
+namespace Ds
+{
+
+	template<typename T>
+	class Array  // NOLINT(cppcoreguidelines-special-member-functions)
 	{
 	public:
-		void Append(Type x);
-		void Insert(int index, Type x);
-		Type Get(const int index)const;
-		bool Set(const Type x, const int index);
+		void Append(T x);
+		void Insert(int index, T x);
+		[[nodiscard]] Result<T> Get(int index)const;
+		bool Set(T x, int index);
 		void Remove(int index);
-		int LinearSearch(Type element);
-		int BinarySearch(Type element);
-		int BinarySearch(Type element, int low , int high);
+		int LinearSearch(T element);
+		int BinarySearch(T element);
+		int BinarySearch(T element, int low , int high);
 		void BubbleSort();
 		bool IsSorted();
 		void Reverse();
-		Type Max();
-		Type Min();
+		T Max();
+		T Min();
 		void LeftShift(int start);
 		void RightShift(int start, bool b_resize);
-		bool InsertSorted(Type x);
-		inline size_t GetLength() const { return m_length; }
-		inline int GetSize() const { return m_size; }
+		bool InsertSorted(T x);
+		void Merge(const Array<T> & arr);
+		[[nodiscard]] size_t GetLength() const;
+		[[nodiscard]] size_t GetSize() const;
+		[[nodiscard]] T* begin() const;
+		[[nodiscard]] T* end() const;
 
-	public:
 		Array() = delete;
-		Array(int size);
-		Array(std::initializer_list<Type> args);
+		explicit Array(int size);
+		Array(std::initializer_list<T> args);
+		Array(const Array<T>& from);
 		~Array();
-		Type& operator[](int index);
+		T& operator[](int index);
+		Array<T>& operator=(const Array<T>& arr);
 
 	private:
-		Type* m_arr = nullptr;
+		T* m_arr = nullptr;
 		size_t m_size = 0;
 		size_t m_length = 0;
 		bool m_initialized = false;
 
-	private:
 		void Resize(int size);
-		void fill(std::initializer_list<Type>& args);
-		void fill(const Array<Type>& from, Array<Type>& to);
-		static void fill(const Type  * from, Type * to, const int length);
-		inline bool ShouldResize() const{return m_length >= m_size;}
-		bool is_index_valid(const int index) const;
+		void fill(std::initializer_list<T>& args);
+		void fill(const Array<T>& from, Array<T>& to);
+		static void fill(const T  * from, T * to, int length);
 		void reset();
-		void Swap(Type& x, Type& y);
-		bool AreEqual(const double a, const double b, const double epsilon = 1e-6) const;
-		bool AreEqual(const float a, const float b, const float epsilon = 1e-6f) const;
+		void Swap(T& x, T& y);
+		[[nodiscard]] static T Smaller(const T & x, const T & y);
+		[[nodiscard]] static T Larger(const T & x, const T & y);
+
+		[[nodiscard]] bool ShouldResize() const;
+		[[nodiscard]] bool is_index_valid(int index) const;
+		[[nodiscard]] static bool AreEqual(double a, double b, double epsilon = 1e-6);
+		[[nodiscard]] static bool AreEqual(float a, float b, float epsilon = 1e-6f);
+		[[nodiscard]] static bool AreEqual(int a, int b);
 	};
 
-	template <typename Type>
-	bool Array<Type>::is_index_valid(const int index) const
+	template <typename T>
+	bool Array<T>::is_index_valid(const int index) const
 	{
-		if (index >= 0 && index < m_size)
+		if (index >= 0 && index < static_cast<int>(m_size))
 		{
 			return true;
 		}
 		return false;
 	}
 
-	template <typename Type>
-	void Array<Type>::reset()
+	template <typename T>
+	void Array<T>::reset()
 	{
 		if (m_arr || m_initialized)
 		{
@@ -85,36 +104,39 @@ namespace DS
 		}
 	}
 
-	template <typename Type>
-	Array<Type>::Array(const int size)
+	template <typename T>
+	Array<T>::Array(const int size)
 	{
 		m_size = size;
-		m_arr = new Type[m_size];
+		m_arr = new T[m_size];
 		m_length = 0;
 		m_initialized = false;
 	}
 
 
-	template <typename Type>
-	Array<Type>::Array(std::initializer_list<Type> args)
+	template <typename T>
+	Array<T>::Array(std::initializer_list<T> args)
 	{
 		fill(args);
 	}
 
-	template <typename Type>
-	Array<Type>::~Array()
+	template <typename T>
+	Array<T>::Array(const Array<T>& from)
 	{
-		if (m_arr)
-		{
-			delete [] m_arr;
-		}
+		fill(from, *this);
 	}
 
-	template <typename Type>
-	void Array<Type>::fill(std::initializer_list<Type>& args)
+	template <typename T>
+	Array<T>::~Array()
+	{
+		delete [] m_arr;
+	}
+
+	template <typename T>
+	void Array<T>::fill(std::initializer_list<T>& args)
 	{
 		m_size = static_cast<int>(args.size());
-		m_arr = new Type[m_size];
+		m_arr = new T[m_size];
 
 		if (m_arr)
 		{
@@ -128,54 +150,69 @@ namespace DS
 		}
 	}
 
-	template <typename Type>
-	void Array<Type>::fill(const Array<Type>& from, Array<Type>& to)
+	template <typename T>
+	void Array<T>::fill(const Array<T>& from, Array<T>& to)
 	{
 		to.reset();
 		to.m_size = from.GetSize();
-		to.m_arr = new Type[to.m_size];
+		to.m_arr = new T[to.m_size];
 
-		fill(from.m_arr, to.m_arr, from.GetLength());
+		fill(from.m_arr, to.m_arr, static_cast<int>(from.GetLength()));
 
 		to.m_length = from.m_length;
 		to.m_initialized = true;
 	}
 
-	template <typename Type>
-	void Array<Type>::fill(const Type* from, Type* to, const int length)
+	template <typename T>
+	void Array<T>::fill(const T* from, T* to, const int length)
 	{
-		for (size_t i = 0; i < length; i++)
+		for (int i = 0; i < length; i++)
 		{
 			to[i] = from[i];
 		}
 	}
 
-	template <typename Type>
-	Type& Array<Type>::operator[](int index)
+	template <typename T>
+	T& Array<T>::operator[](int index)
 	{
-		return m_arr[index];
+		if (is_index_valid(index))
+		{
+			return m_arr[index];
+		}
+
+		throw std::out_of_range("Given index is out of range");
 	}
 
-	template <typename Type>
-	void Array<Type>::Append(Type x)
+	template <typename T>
+	Array<T>& Array<T>::operator=(const Array<T>& arr)
+	{
+		fill(arr, *this);
+		return *this;
+	}
+
+
+	template <typename T>
+	void Array<T>::Append(T x)
 	{
 		if (ShouldResize())
 		{
-			Resize(NewSize(GetSize()));
+			Resize(static_cast<int>(NewSize(GetSize())));
 		}
 
 		m_arr[m_length] = x;
 		++m_length;
+		if (!m_initialized)
+		{
+			m_initialized = true;
+		}
 	}
 
-	template <typename Type>
-	void Array<Type>::Resize(const int size)
+	template <typename T>
+	void Array<T>::Resize(const int size)
 	{
-		//TODO: Implement resize
-
 		m_size = size;
-		Type* temp = new Type[m_size];
-		fill(m_arr, temp, m_length);
+		T* temp = new T[m_size];
+		fill(m_arr, temp, static_cast<int>(m_length));
 		delete [] m_arr;
 		m_arr = temp;
 		temp = nullptr;
@@ -184,8 +221,8 @@ namespace DS
 
 
 
-	template <typename Type>
-	void Array<Type>::RightShift(const int start, const bool b_resize)
+	template <typename T>
+	void Array<T>::RightShift(const int start, const bool b_resize)
 	{
 		if (b_resize)
 		{
@@ -195,13 +232,13 @@ namespace DS
 		for (int i = m_length - 1; i >= start; i--)
 		{
 			m_arr[(i + 1)] = m_arr[i];
-			std::cout << i << " " << m_arr[i + 1] << " = " << m_arr[i] << std::endl;
+			
 		}
 
 	}
 
-	template <typename Type>
-	void Array<Type>::LeftShift(const int start)
+	template <typename T>
+	void Array<T>::LeftShift(const int start)
 	{
 		for (int i = start; i < m_length - 1; i++)
 		{
@@ -210,8 +247,8 @@ namespace DS
 		--m_length;
 	}
 
-	template <typename Type>
-	void Array<Type>::Insert(int index, Type x)
+	template <typename T>
+	void Array<T>::Insert(int index, T x)
 	{
 		if (is_index_valid(index))
 		{
@@ -221,14 +258,14 @@ namespace DS
 		}
 	}
 
-	template <typename Type>
-	void Array<Type>::Remove(const int index)
+	template <typename T>
+	void Array<T>::Remove(const int index)
 	{
 		LeftShift(index);
 	}
 
-	template <typename Type>
-	bool Array<Type>::InsertSorted(Type x)
+	template <typename T>
+	bool Array<T>::InsertSorted(T x)
 	{
 		if (!IsSorted())
 		{
@@ -247,14 +284,88 @@ namespace DS
 		return false;
 	}
 
-
-	template <typename Type>
-	Type Array<Type>::Max()
+	template<typename T>
+	void Array<T>::Merge(const Array<T>& arr)
 	{
-		std::is_arithmetic<Type> b_arithmetic;
+		Array<T> * temp = new Array<T>(static_cast<int>((arr.GetLength() + GetLength())));
+
+		size_t i = 0, j=0, k=0;
+
+		while (i < GetLength() && j < arr.GetLength())
+		{
+			if(m_arr[i] < arr.m_arr[j])
+			{
+				temp->m_arr[k] = m_arr[i];
+				++(temp->m_length);
+				i++;
+				k++;
+			}
+			else if(m_arr[i] > arr.m_arr[j])
+			{
+				temp->m_arr[k] = arr.m_arr[j];
+				++(temp->m_length);
+				j++;
+				k++;
+			}
+		}
+
+		for(; i < GetLength(); i++)
+		{
+			temp->m_arr[k] = m_arr[i];
+			++(temp->m_length);
+			k++;
+		}
+
+		for(; j < arr.GetLength(); j++)
+		{
+			temp->m_arr[k] = arr.m_arr[j];
+			++(temp->m_length);
+			k++;
+		}
+
+		delete []m_arr;
+
+		this->m_arr = temp->m_arr;
+		this->m_length = temp->m_length;
+		this->m_size = temp->m_size;
+		this->m_initialized = (m_length > 0);
+
+		temp = nullptr;
+	}
+
+
+	template <typename T>
+	size_t Array<T>::GetLength() const
+	{ return m_length; }
+
+	template <typename T>
+	size_t Array<T>::GetSize() const
+	{ return m_size; }
+
+	template<typename T>
+	T* Array<T>::begin() const
+	{
+		 return m_arr; //first element of array
+	}
+
+	template <typename T>
+	T* Array<T>::end() const
+	{
+		return m_arr + GetLength(); // last element of array
+	}
+
+	template <typename T>
+	bool Array<T>::ShouldResize() const
+	{return m_length >= m_size;}
+
+
+	template <typename T>
+	T Array<T>::Max()
+	{
+		std::is_arithmetic<T> b_arithmetic;
 		if (b_arithmetic.value)
 		{
-			Type max = m_arr[0];
+			T max = m_arr[0];
 
 			for (int i = 0; i < m_length; i++)
 			{
@@ -266,16 +377,16 @@ namespace DS
 			return  max;
 		}
 
-		throw std::invalid_argument("Type is not arithmatic");
+		throw std::invalid_argument("T is not arithmatic");
 	}
 
-	template <typename Type>
-	Type Array<Type>::Min()
+	template <typename T>
+	T Array<T>::Min()
 	{
-		std::is_arithmetic<Type> b_arithmetic;
+		std::is_arithmetic<T> b_arithmetic;
 		if (b_arithmetic.value)
 		{
-			Type min = m_arr[0];
+			T min = m_arr[0];
 
 			for (int i = 0; i < m_length; i++)
 			{
@@ -287,11 +398,11 @@ namespace DS
 			return  min;
 		}
 
-		throw std::invalid_argument("Type is not arithmatic");
+		throw std::invalid_argument("T is not arithmatic");
 	}
 
-	template <typename Type>
-	void Array<Type>::Reverse()
+	template <typename T>
+	void Array<T>::Reverse()
 	{
 		int i = 0;
 		int j = m_length - 1;
@@ -304,8 +415,8 @@ namespace DS
 		}
 	}
 
-	template <typename Type>
-	bool Array<Type>::IsSorted()
+	template <typename T>
+	bool Array<T>::IsSorted()
 	{
 		for (int i = 0; i < m_length - 1; i++)
 		{
@@ -317,8 +428,8 @@ namespace DS
 		return true;
 	}
 
-	template <typename Type>
-	int Array<Type>::LinearSearch(Type element)
+	template <typename T>
+	int Array<T>::LinearSearch(T element)
 	{
 		for (int i = 0; i < m_length; i++)
 		{
@@ -330,15 +441,12 @@ namespace DS
 		return -1;
 	}
 
-	template <typename Type>
-	int Array<Type>::BinarySearch(Type element)
+	template <typename T>
+	int Array<T>::BinarySearch(T element)
 	{
-		if (!IsSorted())
-		{
-			throw std::runtime_error("Array is not sorted.");
-		}
-
-		int low = 0, mid = 0, high = m_length - 1;
+		int low = 0;
+		int mid = 0;
+		int high = static_cast<int>(m_length - static_cast<size_t>(1));
 
 		while (low <= high)
 		{
@@ -362,8 +470,8 @@ namespace DS
 		return -1;
 	}
 
-	template <typename Type>
-	int Array<Type>::BinarySearch(Type element, int low, int high)
+	template <typename T>
+	int Array<T>::BinarySearch(T element, int low, int high)
 	{
 		if (high >= low)
 		{
@@ -376,12 +484,12 @@ namespace DS
 
 			if (element < m_arr[mid])
 			{
-				return BinarySearchRecursive(element, low, mid - 1);
+				return BinarySearch(element, low, mid - 1);
 			}
 
 			if (element > m_arr[mid])
 			{
-				return BinarySearchRecursive(element, mid + 1, high);
+				return BinarySearch(element, mid + 1, high);
 			}
 
 		}
@@ -389,8 +497,9 @@ namespace DS
 		return -1;
 	}
 
-	template <typename Type>
-	void Array<Type>::BubbleSort()
+
+	template <typename T>
+	void Array<T>::BubbleSort()
 	{
 		while (!IsSorted())
 		{
@@ -404,18 +513,19 @@ namespace DS
 		}
 	}
 
-	template <typename Type>
-	Type Array<Type>::Get(const int index)const
+	template <typename T>
+	Result<T> Array<T>::Get(const int index)const
 	{
 		if (index >= 0 && index < m_length)
 		{
-			return m_arr[index];
+			return {Ok, m_arr[index], ""};
 		}
-		throw std::out_of_range("Index out of range");
+
+		return {Err, static_cast<T>(-1), "index out of bound"};
 	}
 
-	template <typename Type>
-	bool Array<Type>::Set(const Type x, const int index)
+	template <typename T>
+	bool Array<T>::Set(const T x, const int index)
 	{
 		if (is_index_valid(index))
 		{
@@ -425,24 +535,48 @@ namespace DS
 		return false;
 	}
 
-	template <typename Type>
-	void Array<Type>::Swap(Type& x, Type& y)
+	template <typename T>
+	void Array<T>::Swap(T& x, T& y)
 	{
-		Type temp = x;
+		T temp = x;
 		x = y;
 		y = temp;
 	}
 
-	template <typename Type>
-	bool Array<Type>::AreEqual(const double a, const double b, const double epsilon) const
+	template <typename T>
+	T Array<T>::Smaller(const T& x, const T& y)
+	{
+		if(x>y)
+			return y;
+
+		return x;
+	}
+
+	template<typename T>
+	T Array<T>::Larger(const T& x, const T& y)
+	{
+		if(x>y)
+			return x;
+
+		return y;
+	}
+
+	template <typename T>
+	bool Array<T>::AreEqual(const double a, const double b, const double epsilon)
 	{
 		return std::abs(a - b) < epsilon;
 	}
 
-	template <typename Type>
-	bool Array<Type>::AreEqual(const float a, const float b, const float epsilon) const
+	template <typename T>
+	bool Array<T>::AreEqual(const float a, const float b, const float epsilon)
 	{
 		return std::abs(a - b) < epsilon;
+	}
+
+	template<typename T>
+	inline bool Array<T>::AreEqual(const int a, const int b)
+	{
+		return a == b;
 	}
 	
 }

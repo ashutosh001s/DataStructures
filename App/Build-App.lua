@@ -17,7 +17,7 @@ project "App"
 
    links
    {
-      "DSCore"
+      
    }
 
    targetdir ("../Binaries/" .. OutputDir .. "/%{prj.name}")
