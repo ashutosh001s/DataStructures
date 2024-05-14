@@ -1,40 +1,38 @@
-#pragma once
-#include "Array.h"
+//
+// Created by ashut on 13-05-2024.
+//
 
-#define Log(prefix , msg) std::cout << (prefix) << (msg) <<"\n"
-#define Print(arr) \
-	for(size_t i = 0; i < (arr).GetLength(); i++)\
-	{\
-		Log("",(arr)[static_cast<int>(i)]); \
-	} \
+#ifndef CLDS_DSTYPES_H
+#define CLDS_DSTYPES_H
 
-#define FillList(arr, count) \
-	for (int i = 0; i < (count); i++)\
-    {\
-        (arr).Append(i+i);\
-    }\
-
-#define FillVector(arr, count) \
-	for (int i = 0; i < (count); i++)\
-    {\
-        (arr).push_back(i+i);\
-    }\
-
-#define BENCHMARK_START() const auto start = std::chrono::high_resolution_clock::now();
-
-
-#define BENCHMARK_END() \
-	const auto end = std::chrono::high_resolution_clock::now();	\
-	const std::chrono::duration<double, std::milli> duration = end - start;	\
-	std::cout << duration.count() << "ms\n";	\
-
-
-
-namespace Ds
+enum
 {
-	//Type definations
-	using Int = Array<int>;
-	using Float = Array<float>;
-	using Char = Array<char>;
-	using Double = Array<double>;
+    Found = 1,
+    NotFound = -1
+};
+
+enum class Operation
+{
+    LESS_THAN,
+    GREATER_THAN,
+    EQUAL_TO
+};
+
+template <typename T>
+static T Compare(const T &a, const T &b, Operation op)
+{
+    switch (op)
+    {
+    case Operation::LESS_THAN:
+        return a < b ? a : b;
+    case Operation::GREATER_THAN:
+        return a > b ? a : b;
+    case Operation::EQUAL_TO:
+        return a == b && a;
+    default:
+        std::cerr << "Invalid operation!\n"; // Handle invalid input
+        return T();                          // Return a default value or throw an exception
+    }
 }
+
+#endif // CLDS_DSTYPES_H
