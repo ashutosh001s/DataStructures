@@ -26,6 +26,7 @@ namespace Ds
 		void BubbleSort();
 		bool IsSorted();
 		void Reverse();
+		void Fill(T element);
 		T Max();
 		T Min();
 		void LeftShift(int start);
@@ -39,6 +40,7 @@ namespace Ds
 
 		Array() = delete;
 		Array(int size);
+		Array(int size, T elementToFillWith);
 		Array(std::initializer_list<T> args);
 		Array(const Array<T> &from);
 		~Array();
@@ -108,6 +110,22 @@ namespace Ds
 		m_arr = new T[m_size];
 		m_length = 0;
 		m_initialized = false;
+	}
+
+	template<typename T>
+	Array<T>::Array(int size, T elementToFillWith)
+	{
+		m_size = size;
+		m_arr = new T[m_size];
+		m_length = 0;
+
+		for (size_t i = 0; i < m_size; i++)
+		{
+			m_arr[i] = elementToFillWith;
+			++m_length;
+		}
+
+		m_initialized = true;
 	}
 
 	template <typename T>
@@ -421,6 +439,16 @@ namespace Ds
 			Swap(m_arr[i], m_arr[j]);
 			++i;
 			--j;
+		}
+	}
+
+	template<typename T>
+	inline void Array<T>::Fill(T element)
+	{
+		for (size_t i = 0; i < GetSize(); i++)
+		{
+			m_arr[i] = element;
+			++m_length;
 		}
 	}
 

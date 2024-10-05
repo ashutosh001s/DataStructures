@@ -1,4 +1,0 @@
-D:/DEV/repo/ds/DataStructures/out/build/x64-Debug/CMakeFiles/docs.dir
-D:/DEV/repo/ds/DataStructures/out/build/x64-Debug/CMakeFiles/DataStructures.dir
-D:/DEV/repo/ds/DataStructures/out/build/x64-Debug/CMakeFiles/edit_cache.dir
-D:/DEV/repo/ds/DataStructures/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
