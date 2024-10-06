@@ -185,7 +185,7 @@ void FindPairOfElementsWithSumK(Array<int>* arr, int Sum)
 {
     for (int i = 0; i < arr->GetLength(); ++i)
     {
-        for (int j = i + 1; arr->GetLength(); ++j)
+        for (int j = (i + 1);j < arr->GetLength(); ++j)
         {
             if ((arr->Get(i) + arr->Get(j)) == Sum)
             {
