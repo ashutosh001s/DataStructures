@@ -5,7 +5,7 @@
 
 using namespace Ds;
 
-#define O()
+#define O(...)
 
 #define NewHashTable(type, size) Array<type>(size, 0); 
 
@@ -35,7 +35,7 @@ int main()
           //MissingElementUsingHashTable(&arr);
 
           Array<int> arr = {8,3,6,4,6,5,6,8,2,7};
-          FindingDuplicatesInUnsortedArrayUsingHashTable(&arr);
+          FindPairOfElementsWithSumK(&arr,10);
 
             // FillList(arr,100000000)
             // BENCHMARK_START()
