@@ -16,6 +16,7 @@ void DuplicatesInSortedArray(Array<int>* arr);
 void FindDuplicatesInSortedArrayUsingHashTable(Array<int>* arr);
 void FindingDuplicatesInUnsortedArray(Array<int>* arr);
 void FindingDuplicatesInUnsortedArrayUsingHashTable(Array<int>* arr);
+void FindPairOfElementsWithSumK(Array<int>* arr, int Sum);
 
 int main()
 {
@@ -176,6 +177,21 @@ void FindingDuplicatesInUnsortedArrayUsingHashTable(Array<int>* arr) O(n)
         if (H[i] > 0) 
         {
             std::cout << i << " count : " << H[i] << std::endl;
+        }
+    }
+}
+
+void FindPairOfElementsWithSumK(Array<int>* arr, int Sum)
+{
+    for (int i = 0; i < arr->GetLength(); ++i)
+    {
+        for (int j = i + 1; arr->GetLength(); ++j)
+        {
+            if ((arr->Get(i) + arr->Get(j)) == Sum)
+            {
+                std::cout << "Pairs : " << arr->Get(i) << " and " << arr->Get(j) << std::endl;
+            }
+
         }
     }
 }
