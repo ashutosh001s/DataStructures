@@ -17,6 +17,9 @@ void FindDuplicatesInSortedArrayUsingHashTable(Array<int>* arr);
 void FindingDuplicatesInUnsortedArray(Array<int>* arr);
 void FindingDuplicatesInUnsortedArrayUsingHashTable(Array<int>* arr);
 void FindPairOfElementsWithSumK(Array<int>* arr, int Sum);
+void FindPairOfElementsWithSumKArrayUsingHashTable(Array<int>* arr, int Sum);
+void FindPairOfElementsWithSumKInSortedArray(Array<int>* arr, int Sum);
+void FindMinAndMax(Array<int>* arr);
 
 int main()
 {
@@ -34,8 +37,8 @@ int main()
           std::cout << "Missing element is : " << missing << "\n";*/
           //MissingElementUsingHashTable(&arr);
 
-          Array<int> arr = {8,3,6,4,6,5,6,8,2,7};
-          FindPairOfElementsWithSumK(&arr,10);
+          Array<int> arr = {5,8,3,9,6,2,10,7,-1,4};
+          FindMinAndMax(&arr);
 
             // FillList(arr,100000000)
             // BENCHMARK_START()
@@ -121,7 +124,7 @@ void DuplicatesInSortedArray(Array<int>* arr)
     }
 }
 
-void FindDuplicatesInSortedArrayUsingHashTable(Array<int>* arr) O(n)
+O(n) void FindDuplicatesInSortedArrayUsingHashTable(Array<int>* arr) 
 {
     auto H = NewHashTable(int,arr->Max()+1)
 
@@ -142,7 +145,7 @@ void FindDuplicatesInSortedArrayUsingHashTable(Array<int>* arr) O(n)
     }
 }
 
-void FindingDuplicatesInUnsortedArray(Array<int>* arr) O(n sq)
+O(n sq) void FindingDuplicatesInUnsortedArray(Array<int>* arr)
 {
     for (int i = 0; i < arr->GetLength(); i++)
     {
@@ -163,7 +166,7 @@ void FindingDuplicatesInUnsortedArray(Array<int>* arr) O(n sq)
     }
 }
 
-void FindingDuplicatesInUnsortedArrayUsingHashTable(Array<int>* arr) O(n)
+O(n) void FindingDuplicatesInUnsortedArrayUsingHashTable(Array<int>* arr)
 {
     Array<int> H = NewHashTable(int, arr->Max()+1);
 
@@ -194,4 +197,65 @@ void FindPairOfElementsWithSumK(Array<int>* arr, int Sum)
 
         }
     }
+}
+
+void FindPairOfElementsWithSumKArrayUsingHashTable(Array<int>* arr, int Sum)
+{
+    Array<int> H = NewHashTable(int, arr->Max() + 1);
+    
+    for (int i = 0; i < arr->GetLength(); ++i)
+    {
+        auto reqNum = Sum - (*arr)[i];
+        if (H.Get(reqNum) > 0)
+        {
+            std::cout << "Pairs : " << (*arr)[i] << " and " << reqNum << std::endl;
+        }
+        else
+        {
+            ++H[(*arr)[i]];
+        }
+    }
+}
+
+void FindPairOfElementsWithSumKInSortedArray(Array<int>* arr, int Sum)
+{
+    int i = 0, j = arr->GetLength()-1;
+
+    while ((*arr)[i] != (*arr)[j])
+    {
+        
+        if (((*arr)[i] + (*arr)[j]) == Sum)
+        {
+            std::cout << "Pairs : " << (*arr)[i] << " and " << (*arr)[j] << std::endl;
+            ++i;
+            --j;
+        }
+        else if (((*arr)[i] + (*arr)[j]) > Sum)
+        {
+            --j;
+        }
+        else if (((*arr)[i] + (*arr)[j]) < Sum)
+        {
+            ++i;
+        }
+    }
+}
+
+void FindMinAndMax(Array<int>* arr)
+{
+    int Min = (*arr)[0], Max = (*arr)[0];
+
+    for (size_t i = 0; i < arr->GetLength(); i++)
+    {
+        if ((*arr)[i] < Min)
+        {
+            Min = (*arr)[i];
+        }
+        else if ((*arr)[i] > Max)
+        {
+            Max = (*arr)[i];
+        }
+    }
+
+    std::cout << "Min : " << Min << " Max : " << Max << std::endl;
 }

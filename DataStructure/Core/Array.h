@@ -46,6 +46,7 @@ namespace Ds
 		~Array();
 		T &operator[](int index);
 		Array<T> &operator=(const Array<T> &arr);
+		
 		bool IsValid() const { return m_arr != nullptr; }
 
 	private:
