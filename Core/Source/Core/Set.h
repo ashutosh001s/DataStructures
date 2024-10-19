@@ -5,6 +5,7 @@
 #include "DsTypes.h"
 #include "initializer_list"
 
+
 #define CreateArray(size) new Ds::Array<T>(static_cast<int>(size));
 
 #define FreeArray(array) \
@@ -12,9 +13,7 @@
     m_array = temp;      \
     temp = nullptr;
 
-#define CheckOrReturn(condition) \
-    if (!condition)              \
-        return;
+
 
 namespace Ds
 {

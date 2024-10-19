@@ -2,6 +2,8 @@
 #include "Core/Array.h"
 #include "Core/Set.h"
 #include "Core/HelperMacros.h"
+#include "Core/String.h"
+#include "Core/String.h"
 
 using namespace Ds;
 
@@ -24,6 +26,7 @@ void FindMinAndMax(Array<int>* arr);
 int main()
 {
     {
+        //Todo 
         /*Set<int> even = { 0 };
 
         BENCHMARK_START()
@@ -37,8 +40,11 @@ int main()
           std::cout << "Missing element is : " << missing << "\n";*/
           //MissingElementUsingHashTable(&arr);
 
-          Array<int> arr = {5,8,3,9,6,2,10,7,-1,4};
-          FindMinAndMax(&arr);
+         /* Array<int> arr = {5,8,3,9,6,2,10,7,-1,4};
+          FindMinAndMax(&arr);*/
+
+        Ds::String str = "Hello World abcdefghijklmnopqrstvvwxyz";
+        str.Printf();
 
             // FillList(arr,100000000)
             // BENCHMARK_START()

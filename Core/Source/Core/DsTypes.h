@@ -5,6 +5,10 @@
 #ifndef CLDS_DSTYPES_H
 #define CLDS_DSTYPES_H
 
+#define CheckOrReturn(condition) \
+    if (!condition)              \
+        return;
+
 enum
 {
     Found = 1,
