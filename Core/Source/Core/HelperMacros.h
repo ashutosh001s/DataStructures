@@ -24,10 +24,10 @@
     }                                         \
     std::cout << ")\n";
 
-#define FillList(arr, count)          \
-	for (int i = 0; i < (count); i++) \
+#define FillList(arr, start ,count, exp)          \
+	for (int i = (start); i <= (count); i++) \
 	{                                 \
-		(arr).Append(i + i);          \
+		(arr).Append((exp));          \
 	}
 
 #define FillSet(set, count)          \

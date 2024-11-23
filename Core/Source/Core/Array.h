@@ -5,8 +5,24 @@
 #include "string"
 #include "DsTypes.h"
 #include <algorithm>
+#include "thread"
+#include "vector"
 
 #define NewSize(x) (static_cast<int>((x) * 2))
+
+template <typename T>
+int Search(T* arr, T ele, int startInd, int endInd)
+{
+	while (startInd <= endInd)
+	{
+		if (arr[startInd] == ele)
+		{
+			return startInd;
+		}
+		++startInd;
+	}
+	return -1;
+}
 
 namespace Ds
 {
@@ -21,6 +37,7 @@ namespace Ds
 		bool Set(T x, int index);
 		void Remove(int index);
 		int LinearSearch(T element);
+		int ParallelLinearSearch(T target);
 		int BinarySearch(T element);
 		int BinarySearch(T element, int low, int high);
 		void BubbleSort();
@@ -469,15 +486,93 @@ namespace Ds
 	template <typename T>
 	int Array<T>::LinearSearch(T element)
 	{
-		for (int i = 0; i < m_length; i++)
-		{
-			if (m_arr[i] == element)
-			{
-				return i;
+		int workerCount= 2;
+		if (workerCount <= 0) workerCount = 1; // Ensure at least one worker
+		std::vector<std::thread> workers(workerCount);
+		std::atomic<bool> found(false);
+		int foundIndex = -1; // Variable to store the first occurrence
+
+		// Search function
+		auto Search = [](T* arr, int start, int end, T element, std::atomic<bool>& found, int& result) {
+			for (int i = start; i < end; ++i) {
+				if (arr[i] == element) {
+					if (!found.exchange(true)) { // Update found only if it was false
+						result = i; // Record the index of the first occurrence
+					}
+					break; // Stop searching this thread
+				}
+			}
+			};
+
+		int elePerWorker = (m_length + workerCount - 1) / workerCount; // Divide elements evenly
+		int startIndex = 0;
+
+		for (int i = 0; i < workerCount; ++i) {
+			int endIndex = startIndex + elePerWorker;
+			if (endIndex > m_length) endIndex = m_length; // Ensure bounds are correct
+
+			// Launch thread for this range
+			workers[i] = std::thread(Search, m_arr, startIndex, endIndex, element, std::ref(found), std::ref(foundIndex));
+			startIndex = endIndex; // Move to next range
+		}
+
+		// Join all threads
+		for (int i = 0; i < workerCount; ++i) {
+			if (workers[i].joinable()) {
+				workers[i].join();
 			}
 		}
-		return -1;
+
+		return foundIndex; // Return -1 if the element was not found
 	}
+
+
+
+	// Parallel Linear Search Function
+	template <typename T>
+	int Array<T>::ParallelLinearSearch( T target) {
+
+		const T* arr = m_arr;
+		int length = m_length;
+		int workerCount = 1;
+
+		if (workerCount <= 0) workerCount = 1; // At least one thread
+		if (workerCount > length) workerCount = length; // Limit workers to array size
+
+		std::atomic<int> foundIndex(-1); // Atomic to store the found index
+		std::vector<std::thread> workers;
+
+		// Function to search a range in the array
+		auto searchRange = [](const T* arr, int start, int end, T target, std::atomic<int>& foundIndex) {
+			for (int i = start; i < end && foundIndex.load() == -1; ++i) {
+				if (arr[i] == target) {
+					foundIndex.store(i); // Update the found index
+					return;
+				}
+			}
+			};
+
+		// Divide the workload among threads
+		int elementsPerWorker = (length + workerCount - 1) / workerCount; // Ensure even division
+		for (int i = 0; i < workerCount; ++i) {
+			int start = i * elementsPerWorker;
+			int end = std::min(start + elementsPerWorker, length);
+
+			workers.emplace_back(searchRange, arr, start, end, target, std::ref(foundIndex));
+		}
+
+		// Join all threads
+		for (auto& worker : workers) {
+			if (worker.joinable()) {
+				worker.join();
+			}
+		}
+
+		return foundIndex.load(); // Return the found index, or -1 if not found
+	}
+
+
+
 
 	template <typename T>
 	int Array<T>::BinarySearch(T element)

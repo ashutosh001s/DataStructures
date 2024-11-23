@@ -43,7 +43,7 @@ namespace Ds
     void Set<T>::Append(T x)
     {
         std::cout << ++count << " Searching...\n";
-        if (m_array->BinarySearch(x) == -1)
+        if (m_array->LinerSearch(x) == -1)
         {
             std::cout << count << "Appending...\n";
             m_array->Append(x);

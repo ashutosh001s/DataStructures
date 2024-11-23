@@ -5,6 +5,14 @@
 #include "Core/String.h"
 #include "Core/String.h"
 
+
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <stdexcept>
+
+std::string readFile(const std::string& filename);
+
 using namespace Ds;
 
 #define O(...)
@@ -26,6 +34,10 @@ void FindMinAndMax(Array<int>* arr);
 int main()
 {
     {
+        Array<int> arr = { 0 };
+        FillList(arr,0, 1000, i); // fill arr from 0 to 1000 
+        std::cout << "\nGet at " << arr.Get(692)<<"\n"; // expected 691
+        std::cout << "\nFound at " << arr.ParallelLinearSearch(692)<<"\n"; //result is 693
         //Todo 
         /*Set<int> even = { 0 };
 
@@ -43,8 +55,30 @@ int main()
          /* Array<int> arr = {5,8,3,9,6,2,10,7,-1,4};
           FindMinAndMax(&arr);*/
 
-        Ds::String str = "Hello World abcdefghijklmnopqrstvvwxyz";
-        str.Printf();
+        /*std::string msg;
+        std::cout << "What is your message: ";
+        std::getline(std::cin, msg);*/
+
+        /*std::string content;
+
+        try {
+            content = readFile("../Core/Source/Core/Data.txt");
+        }
+        catch (const std::runtime_error& e) {
+            std::cerr << e.what() << std::endl;
+        }
+
+
+        Ds::String str = content.c_str();
+        auto result = str.GetCharAndVowelsAndConsonentsCount();
+
+
+        std::cout << "Characters Count : " << result[0] << "\n"  << "Vowels Count : " << result[1] << "\n" << "Consonents Count : " << result[2] << "\n" << "Words : " << str.GetWordCount() << std::endl;
+       // std::cout << "Size : " << str.GetSizeInMB() <<"MB";
+
+        //str.Printf();
+
+        std::cout << str << std::endl;*/
 
             // FillList(arr,100000000)
             // BENCHMARK_START()
@@ -55,6 +89,21 @@ int main()
 
     return 0;
 }
+
+
+
+std::string readFile(const std::string& filename) {
+    std::ifstream file(filename);
+
+    if (!file.is_open()) {
+        throw std::runtime_error("Could not open file " + filename);
+    }
+
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    return buffer.str();
+}
+
 
 int FindSingleMissingNaturalNumber(Array<int> * arr)
 {
